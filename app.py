@@ -5,7 +5,7 @@ import pandas as pd
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["https://kawatch-wkqh.vercel.app"]}})
+CORS(app, resources={r"/api/*": {"origins": ["https://kawatch-wkqh.vercel.app"]}}, supports_credentials=True)
 
 # Load the model, scaler, and encoders
 model = joblib.load('models/lightgbm_aml_model.pkl')
@@ -23,8 +23,11 @@ label_encoders = {
 def home():
     return render_template('index.html')
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
+    if request.method == 'OPTIONS':
+        # Preflight request handling
+        return jsonify({'status': 'ok'})
     data = request.get_json(force=True)
     
     features = [
@@ -49,8 +52,11 @@ def predict():
         'probability': probabilities.tolist()
     })
 
-@app.route('/bulk_predict', methods=['POST'])
+@app.route('/bulk_predict', methods=['POST', 'OPTIONS'])
 def bulk_predict():
+    if request.method == 'OPTIONS':
+        # Preflight request handling
+        return jsonify({'status': 'ok'})
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
 
@@ -86,7 +92,6 @@ def bulk_predict():
         return jsonify(results)
     else:
         return jsonify({'error': 'Allowed file types are csv'}), 400
-
 
 if __name__ == '__main__':
     app.run(debug=True)
