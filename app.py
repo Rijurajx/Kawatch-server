@@ -5,7 +5,7 @@ import pandas as pd
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": ["https://kawatch-wkqh.vercel.app"]}})
 
 # Load the model, scaler, and encoders
 model = joblib.load('models/lightgbm_aml_model.pkl')
